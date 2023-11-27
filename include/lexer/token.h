@@ -87,6 +87,7 @@ Token token_create(TokenType type, Lexeme lexeme, Position start,
 	    .lexeme = lexeme,
 	    .start = start,
 	    .end = end,
+	    .data = {0},
 	};
 }
 
