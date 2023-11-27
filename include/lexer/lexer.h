@@ -1,0 +1,4 @@
+#ifndef _KINETIC_LANG_LEXER_H
+#define _KINETIC_LANG_LEXER_H
+
+#endif // _KINETIC_LANG_LEXER_H
