@@ -30,10 +30,10 @@ typedef struct {
 	size_t column;
 } Position;
 
-Position position_create(size_t line, size_t column) {
+static Position position_create(size_t line, size_t column) {
 	return (Position){
-	    .column = column,
 	    .line = line,
+	    .column = column,
 	};
 }
 
@@ -42,7 +42,8 @@ typedef struct {
 	size_t length;
 } Lexeme;
 
-Lexeme lexeme_create(const char *input, size_t start_offset, size_t length) {
+static Lexeme lexeme_create(const char *input, size_t start_offset,
+                            size_t length) {
 	return (Lexeme){
 	    .ptr = input + start_offset,
 	    .length = length,
@@ -80,8 +81,8 @@ typedef struct {
 	} data;
 } Token;
 
-Token token_create(TokenType type, Lexeme lexeme, Position start,
-                   Position end) {
+static Token token_create(TokenType type, Lexeme lexeme, Position start,
+                          Position end) {
 	return (Token){
 	    .type = type,
 	    .lexeme = lexeme,
