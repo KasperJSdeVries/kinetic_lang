@@ -1,0 +1,13 @@
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForIndentation
+
+# Wrapping
+ColumnLimit: 80
+
+# Vertical spacing
+MaxEmptyLinesToKeep: 1
+
