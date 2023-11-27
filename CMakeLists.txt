@@ -36,8 +36,8 @@ add_library(parser ${PARSER_SOURCES})
 
 # Main Compiler
 file(GLOB COMPILER_SOURCES "src/*.c")
-add_executable(my_compiler ${COMPILER_SOURCES})
-target_link_libraries(my_compiler lexer parser)
+add_executable(kcc ${COMPILER_SOURCES})
+target_link_libraries(kcc lexer parser)
 
 # Add include directories if needed
 target_include_directories(lexer PUBLIC include)
