@@ -34,3 +34,16 @@ TEST(lexer_test, lexing_empty_input_should_return_array_containing_TOKEN_EOF) {
 	ASSERT_EQ(token_count, 1);
 	ASSERT_EQ(tokens[0].type, TOKEN_EOF);
 }
+
+TEST(lexer_test, lexing_whitespace_should_return_array_containing_TOKEN_EOF) {
+	// Arrange
+	Lexer *lexer = lexer_create(" \t\r\n ");
+	size_t token_count;
+
+	// Act
+	Token *tokens = lexer_lex(lexer, &token_count);
+
+	// Assert
+	ASSERT_EQ(token_count, 1);
+	ASSERT_EQ(tokens[0].type, TOKEN_EOF);
+}

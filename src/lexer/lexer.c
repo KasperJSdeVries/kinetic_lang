@@ -93,7 +93,7 @@ bool lexer_at_end(const Lexer *lexer) {
 
 void lexer_skip_whitespace(Lexer *lexer) {
 	for (;;) {
-		switch (lexer_peek(lexer, 1)) {
+		switch (lexer_current(lexer)) {
 			case ' ':
 			case '\r':
 			case '\t':
