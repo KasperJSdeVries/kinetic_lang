@@ -10,6 +10,17 @@
 
 #define ENUMERATE_TOKEN_TYPES                                                  \
 	__ENUMERATE_TOKEN_TYPE(INVALID)                                            \
+	__ENUMERATE_TOKEN_TYPE(LEFT_PAREN)                                         \
+	__ENUMERATE_TOKEN_TYPE(RIGHT_PAREN)                                        \
+	__ENUMERATE_TOKEN_TYPE(LEFT_BRACE)                                         \
+	__ENUMERATE_TOKEN_TYPE(RIGHT_BRACE)                                        \
+	__ENUMERATE_TOKEN_TYPE(LEFT_BRACKET)                                       \
+	__ENUMERATE_TOKEN_TYPE(RIGHT_BRACKET)                                      \
+	__ENUMERATE_TOKEN_TYPE(COLON)                                              \
+	__ENUMERATE_TOKEN_TYPE(SEMICOLON)                                          \
+	__ENUMERATE_TOKEN_TYPE(DOT)                                                \
+	__ENUMERATE_TOKEN_TYPE(COMMA)                                              \
+	__ENUMERATE_TOKEN_TYPE(UNDERSCORE)                                         \
 	__ENUMERATE_TOKEN_TYPE(EOF)
 
 typedef enum {

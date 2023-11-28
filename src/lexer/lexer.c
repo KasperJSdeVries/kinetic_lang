@@ -1,3 +1,4 @@
+#include <assert/assert.h>
 #include <lexer/lexer.h>
 #include <lexer/token.h>
 
@@ -43,11 +44,68 @@ Lexer *lexer_create(const char *input) {
 }
 
 Token *lexer_lex(Lexer *lexer, size_t *out_token_count) {
-	while (!lexer_at_end(lexer)) {
+	for (;;) {
 		lexer_skip_whitespace(lexer);
+
+		if (lexer_at_end(lexer)) {
+			lexer_add_single_char_token(lexer, TOKEN_EOF);
+			break;
+		}
+
+		switch (lexer_current(lexer)) {
+			/***************************
+			 * Single character tokens *
+			 ***************************/
+			case '(':
+				lexer_add_single_char_token(lexer, TOKEN_LEFT_PAREN);
+				lexer->current_index++;
+				continue;
+			case ')':
+				lexer_add_single_char_token(lexer, TOKEN_RIGHT_PAREN);
+				lexer->current_index++;
+				continue;
+			case '{':
+				lexer_add_single_char_token(lexer, TOKEN_LEFT_BRACE);
+				lexer->current_index++;
+				continue;
+			case '}':
+				lexer_add_single_char_token(lexer, TOKEN_RIGHT_BRACE);
+				lexer->current_index++;
+				continue;
+			case '[':
+				lexer_add_single_char_token(lexer, TOKEN_LEFT_BRACKET);
+				lexer->current_index++;
+				continue;
+			case ']':
+				lexer_add_single_char_token(lexer, TOKEN_RIGHT_BRACKET);
+				lexer->current_index++;
+				continue;
+			case ':':
+				lexer_add_single_char_token(lexer, TOKEN_COLON);
+				lexer->current_index++;
+				continue;
+			case ';':
+				lexer_add_single_char_token(lexer, TOKEN_SEMICOLON);
+				lexer->current_index++;
+				continue;
+			case '.':
+				lexer_add_single_char_token(lexer, TOKEN_DOT);
+				lexer->current_index++;
+				continue;
+			case ',':
+				lexer_add_single_char_token(lexer, TOKEN_COMMA);
+				lexer->current_index++;
+				continue;
+			case '_':
+				lexer_add_single_char_token(lexer, TOKEN_UNDERSCORE);
+				lexer->current_index++;
+				continue;
+
+			default:
+				ASSERT_NOT_REACHED();
+		}
 	}
 
-	lexer_add_single_char_token(lexer, TOKEN_EOF);
 	*out_token_count = lexer->tokens_length;
 
 	return lexer->tokens;
