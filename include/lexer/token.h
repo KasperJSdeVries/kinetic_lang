@@ -1,6 +1,9 @@
 #ifndef _KINETIC_LANG_TOKEN_H
 #define _KINETIC_LANG_TOKEN_H
 
+#include <assert/assert.h>
+
+// std
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -22,6 +25,8 @@ static char *token_type_as_string(TokenType type) {
 		return #x;
 		ENUMERATE_TOKEN_TYPES
 #undef __ENUMERATE_TOKEN_TYPE
+		default:
+			ASSERT_NOT_REACHED();
 	}
 }
 
@@ -90,13 +95,14 @@ static Token token_create(
     Position start,
     Position end
 ) {
-	return (Token){
+	Token token = {
 	    .type = type,
 	    .lexeme = lexeme,
 	    .start = start,
 	    .end = end,
-	    .data = {0},
+	    .data = {},
 	};
+	return token;
 }
 
 #undef ENUMERATE_TOKEN_TYPES
