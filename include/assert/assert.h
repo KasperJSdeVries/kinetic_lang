@@ -14,12 +14,12 @@ __attribute__((noreturn)) static void assertion_failed(
 	exit(EXIT_FAILURE);
 }
 
-#define VERIFY(expr)                                                           \
+#define ASSERT(expr)                                                           \
 	((!(expr))                                                                 \
 	     ? assertion_failed(#expr, __FILE__, __LINE__, __PRETTY_FUNCTION__)    \
 	     : (void)0)
 
-#define ASSERT_NOT_REACHED() VERIFY(false)
+#define ASSERT_NOT_REACHED() ASSERT(false)
 
 #define TODO()                                                                 \
 	assertion_failed("TODO", __FILE__, __LINE__, __PRETTY_FUNCTION__);
