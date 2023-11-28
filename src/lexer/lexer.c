@@ -101,6 +101,111 @@ Token *lexer_lex(Lexer *lexer, size_t *out_token_count) {
 				lexer->current_index++;
 				continue;
 
+			/**************************
+			 * Multi character tokens *
+			 **************************/
+			case '!':
+				if (lexer_peek(lexer, 1) == '=') {
+					Position start = lexer_get_position(lexer);
+					size_t start_index = lexer->current_index;
+					lexer->current_index++;
+					lexer_add_token(
+					    lexer, token_create(
+					               TOKEN_BANG_EQUALS,
+					               lexeme_create(lexer->input, start_index, 2),
+					               start, lexer_get_position(lexer)
+					           )
+					);
+				} else {
+					lexer_add_single_char_token(lexer, TOKEN_BANG);
+				}
+				lexer->current_index++;
+				continue;
+			case '=':
+				if (lexer_peek(lexer, 1) == '=') {
+					Position start = lexer_get_position(lexer);
+					size_t start_index = lexer->current_index;
+					lexer->current_index++;
+					lexer_add_token(
+					    lexer, token_create(
+					               TOKEN_EQUALS_EQUALS,
+					               lexeme_create(lexer->input, start_index, 2),
+					               start, lexer_get_position(lexer)
+					           )
+					);
+				} else {
+					lexer_add_single_char_token(lexer, TOKEN_EQUALS);
+				}
+				lexer->current_index++;
+				continue;
+			case '+':
+				if (lexer_peek(lexer, 1) == '=') {
+					Position start = lexer_get_position(lexer);
+					size_t start_index = lexer->current_index;
+					lexer->current_index++;
+					lexer_add_token(
+					    lexer, token_create(
+					               TOKEN_PLUS_EQUALS,
+					               lexeme_create(lexer->input, start_index, 2),
+					               start, lexer_get_position(lexer)
+					           )
+					);
+				} else {
+					lexer_add_single_char_token(lexer, TOKEN_PLUS);
+				}
+				lexer->current_index++;
+				continue;
+			case '-':
+				if (lexer_peek(lexer, 1) == '=') {
+					Position start = lexer_get_position(lexer);
+					size_t start_index = lexer->current_index;
+					lexer->current_index++;
+					lexer_add_token(
+					    lexer, token_create(
+					               TOKEN_MINUS_EQUALS,
+					               lexeme_create(lexer->input, start_index, 2),
+					               start, lexer_get_position(lexer)
+					           )
+					);
+				} else {
+					lexer_add_single_char_token(lexer, TOKEN_MINUS);
+				}
+				lexer->current_index++;
+				continue;
+			case '*':
+				if (lexer_peek(lexer, 1) == '=') {
+					Position start = lexer_get_position(lexer);
+					size_t start_index = lexer->current_index;
+					lexer->current_index++;
+					lexer_add_token(
+					    lexer, token_create(
+					               TOKEN_STAR_EQUALS,
+					               lexeme_create(lexer->input, start_index, 2),
+					               start, lexer_get_position(lexer)
+					           )
+					);
+				} else {
+					lexer_add_single_char_token(lexer, TOKEN_STAR);
+				}
+				lexer->current_index++;
+				continue;
+			case '/':
+				if (lexer_peek(lexer, 1) == '=') {
+					Position start = lexer_get_position(lexer);
+					size_t start_index = lexer->current_index;
+					lexer->current_index++;
+					lexer_add_token(
+					    lexer, token_create(
+					               TOKEN_SLASH_EQUALS,
+					               lexeme_create(lexer->input, start_index, 2),
+					               start, lexer_get_position(lexer)
+					           )
+					);
+				} else {
+					lexer_add_single_char_token(lexer, TOKEN_SLASH);
+				}
+				lexer->current_index++;
+				continue;
 			default:
 				ASSERT_NOT_REACHED();
 		}

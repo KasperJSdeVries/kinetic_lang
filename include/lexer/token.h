@@ -21,6 +21,18 @@
 	__ENUMERATE_TOKEN_TYPE(DOT)                                                \
 	__ENUMERATE_TOKEN_TYPE(COMMA)                                              \
 	__ENUMERATE_TOKEN_TYPE(UNDERSCORE)                                         \
+	__ENUMERATE_TOKEN_TYPE(BANG)                                               \
+	__ENUMERATE_TOKEN_TYPE(BANG_EQUALS)                                        \
+	__ENUMERATE_TOKEN_TYPE(EQUALS)                                             \
+	__ENUMERATE_TOKEN_TYPE(EQUALS_EQUALS)                                      \
+	__ENUMERATE_TOKEN_TYPE(PLUS)                                               \
+	__ENUMERATE_TOKEN_TYPE(PLUS_EQUALS)                                        \
+	__ENUMERATE_TOKEN_TYPE(MINUS)                                              \
+	__ENUMERATE_TOKEN_TYPE(MINUS_EQUALS)                                       \
+	__ENUMERATE_TOKEN_TYPE(STAR)                                               \
+	__ENUMERATE_TOKEN_TYPE(STAR_EQUALS)                                        \
+	__ENUMERATE_TOKEN_TYPE(SLASH)                                              \
+	__ENUMERATE_TOKEN_TYPE(SLASH_EQUALS)                                       \
 	__ENUMERATE_TOKEN_TYPE(EOF)
 
 typedef enum {

@@ -71,3 +71,28 @@ TEST(lexer_test, single_character_symbols_should_lex_correctly) {
 	ASSERT_EQ(tokens[10].type, TOKEN_UNDERSCORE);
 	ASSERT_EQ(tokens[11].type, TOKEN_EOF);
 }
+
+TEST(lexer_test, multi_character_symbols_should_lex_correctly) {
+	// Arrange
+	Lexer *lexer = lexer_create("! != = == + += - -= * *= / /=");
+	size_t token_count;
+
+	// Act
+	Token *tokens = lexer_lex(lexer, &token_count);
+
+	// Assert
+	ASSERT_EQ(token_count, 13);
+	ASSERT_EQ(tokens[0].type, TOKEN_BANG);
+	ASSERT_EQ(tokens[1].type, TOKEN_BANG_EQUALS);
+	ASSERT_EQ(tokens[2].type, TOKEN_EQUALS);
+	ASSERT_EQ(tokens[3].type, TOKEN_EQUALS_EQUALS);
+	ASSERT_EQ(tokens[4].type, TOKEN_PLUS);
+	ASSERT_EQ(tokens[5].type, TOKEN_PLUS_EQUALS);
+	ASSERT_EQ(tokens[6].type, TOKEN_MINUS);
+	ASSERT_EQ(tokens[7].type, TOKEN_MINUS_EQUALS);
+	ASSERT_EQ(tokens[8].type, TOKEN_STAR);
+	ASSERT_EQ(tokens[9].type, TOKEN_STAR_EQUALS);
+	ASSERT_EQ(tokens[10].type, TOKEN_SLASH);
+	ASSERT_EQ(tokens[11].type, TOKEN_SLASH_EQUALS);
+	ASSERT_EQ(tokens[12].type, TOKEN_EOF);
+}
