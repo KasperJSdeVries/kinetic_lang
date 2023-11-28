@@ -48,6 +48,20 @@ TEST(lexer_test, lexing_whitespace_should_return_array_containing_TOKEN_EOF) {
 	ASSERT_EQ(tokens[0].type, TOKEN_EOF);
 }
 
+TEST(lexer_test, unknown_character_symbols_should_lex_to_TOKEN_INVALID) {
+	// Arrange
+	Lexer *lexer = lexer_create("#");
+	size_t token_count;
+
+	// Act
+	Token *tokens = lexer_lex(lexer, &token_count);
+
+	// Assert
+	ASSERT_EQ(token_count, 2);
+	ASSERT_EQ(tokens[0].type, TOKEN_INVALID);
+	ASSERT_EQ(tokens[1].type, TOKEN_EOF);
+}
+
 TEST(lexer_test, single_character_symbols_should_lex_correctly) {
 	// Arrange
 	Lexer *lexer = lexer_create("(){}[]:;.,_");

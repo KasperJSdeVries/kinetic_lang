@@ -206,8 +206,11 @@ Token *lexer_lex(Lexer *lexer, size_t *out_token_count) {
 				}
 				lexer->current_index++;
 				continue;
+
 			default:
-				ASSERT_NOT_REACHED();
+				lexer_add_single_char_token(lexer, TOKEN_INVALID);
+				lexer->current_index++;
+				continue;
 		}
 	}
 
