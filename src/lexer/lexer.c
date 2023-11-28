@@ -22,6 +22,7 @@ char lexer_current(const Lexer *lexer);
 char lexer_peek(const Lexer *lexer, int distance);
 bool lexer_at_end(const Lexer *lexer);
 void lexer_skip_whitespace(Lexer *lexer);
+Position lexer_get_position(const Lexer *lexer);
 
 Lexer *lexer_create(const char *input) {
 	if (input == NULL) {
@@ -69,17 +70,12 @@ void lexer_add_token(Lexer *lexer, Token token) {
 }
 
 void lexer_add_single_char_token(Lexer *lexer, TokenType type) {
+	Position current_position = lexer_get_position(lexer);
 	lexer_add_token(
-	    lexer,
-	    token_create(
-	        type, lexeme_create(lexer->input, lexer->current_index, 1),
-	        position_create(
-	            lexer->current_line, lexer->current_index - lexer->line_start
-	        ),
-	        position_create(
-	            lexer->current_line, lexer->current_index - lexer->line_start
-	        )
-	    )
+	    lexer, token_create(
+	               type, lexeme_create(lexer->input, lexer->current_index, 1),
+	               current_position, current_position
+	           )
 	);
 }
 
@@ -112,4 +108,10 @@ void lexer_skip_whitespace(Lexer *lexer) {
 				return;
 		}
 	}
+}
+
+Position lexer_get_position(const Lexer *lexer) {
+	return position_create(
+	    lexer->current_line, lexer->current_index - lexer->line_start
+	);
 }
