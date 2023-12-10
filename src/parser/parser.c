@@ -20,3 +20,9 @@ Parser *parser_create(Token *tokens) {
 void parser_free(Parser *parser) {
 	free(parser);
 }
+
+Module *parser_parse(Parser *parser) {
+	Module *module = malloc(sizeof(Module));
+
+	return module;
+}
