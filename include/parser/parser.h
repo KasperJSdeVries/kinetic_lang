@@ -8,6 +8,6 @@ typedef struct Parser_t Parser;
 
 Parser *parser_create(Token tokens[]);
 void parser_free(Parser *parser);
-Module *parser_parse(Parser *parser);
+Module *parser_parse_module(Parser *parser, const char *name);
 
 #endif // _KINETIC_LANG_PARSER_H
