@@ -69,4 +69,20 @@ implementation_member
     | type identifier '(' this_parameter ',' parameter_list ')' block_statement
     | type identifier '(' this_parameter ')' block_statement
     ;
+
+block_statement
+    : '{' statement_list '}'
+    ;
+
+statement_list
+    : statement
+    | statement statement_list
+    ;
+
+statement
+    : variable_declaration
+    | if_statement
+    | while_statement
+    | for_statement
+    ;
 ```
