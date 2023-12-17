@@ -1,0 +1,25 @@
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+IndentCaseLabels: true
+TabWidth: 4
+UseTab: ForIndentation
+
+# Wrapping
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AlignAfterOpenBracket: BlockIndent
+AlwaysBreakAfterReturnType: None
+BinPackParameters: false
+ColumnLimit: 80
+
+# Vertical spacing
+MaxEmptyLinesToKeep: 1
+
+# Penalties
+PenaltyReturnTypeOnItsOwnLine: 1000
