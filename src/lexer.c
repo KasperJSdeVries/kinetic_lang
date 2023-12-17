@@ -13,7 +13,7 @@ struct lexer lexer_new(const char *input) {
 	l.token_count = 0;
 	l.tokens = malloc(sizeof(struct token) * l.token_capacity);
 
-	for (int i = 0; i < strlen(input); ++i) {
+	for (size_t i = 0; i < strlen(input); ++i) {
 		char c = input[i];
 		if (isspace(c)) {
 			continue;
@@ -26,7 +26,7 @@ struct lexer lexer_new(const char *input) {
 		}
 	}
 
-	for (int i = 0; i < l.token_count / 2; ++i) {
+	for (size_t i = 0; i < l.token_count / 2; ++i) {
 		struct token t = l.tokens[i];
 		l.tokens[i] = l.tokens[l.token_count - i - 1];
 		l.tokens[l.token_count - i - 1] = t;

@@ -29,7 +29,7 @@ struct expression expression_new(const char *input) {
 
 void expression_free(struct expression *expr) {
 	if (expr->type == E_CONS) {
-		for (int i = 0; i < expr->cons.subexpr_count; i++) {
+		for (size_t i = 0; i < expr->cons.subexpr_count; i++) {
 			expression_free(&expr->cons.subexprs[i]);
 		}
 		free(expr->cons.subexprs);
@@ -46,7 +46,7 @@ char *expression_format(const struct expression *expr) {
 		case E_CONS:
 			sprintf(s + offset, "(%c", expr->cons.op);
 			offset = strlen(s);
-			for (int i = 0; i < expr->cons.subexpr_count; i++) {
+			for (size_t i = 0; i < expr->cons.subexpr_count; i++) {
 				sprintf(
 				    s + offset, " %s",
 				    expression_format(&expr->cons.subexprs[i])
