@@ -22,7 +22,7 @@ static struct binding_power prefix_binding_power(char op);
 static struct binding_power infix_binding_power(char op);
 static struct binding_power postfix_binding_power(char op);
 
-struct expression expression_new(char *input) {
+struct expression expression_new(const char *input) {
 	struct lexer lexer = lexer_new(input);
 	return expression_binding_power(&lexer, 0);
 }

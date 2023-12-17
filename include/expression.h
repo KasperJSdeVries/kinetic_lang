@@ -26,7 +26,7 @@ struct expression {
 	};
 };
 
-struct expression expression_new(char *input);
+struct expression expression_new(const char *input);
 void expression_free(struct expression *expr);
 
 char *expression_format(const struct expression *expr);

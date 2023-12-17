@@ -7,7 +7,7 @@
 
 static void lexer_add_token(struct lexer *l, struct token t);
 
-struct lexer lexer_new(char *input) {
+struct lexer lexer_new(const char *input) {
 	struct lexer l;
 	l.token_capacity = 8;
 	l.token_count = 0;

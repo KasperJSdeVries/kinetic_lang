@@ -11,7 +11,7 @@ struct lexer {
 	size_t token_capacity;
 };
 
-struct lexer lexer_new(char *input);
+struct lexer lexer_new(const char *input);
 void lexer_free(struct lexer *lexer);
 
 struct token lexer_next(struct lexer *l);
