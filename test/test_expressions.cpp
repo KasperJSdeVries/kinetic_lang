@@ -41,16 +41,6 @@ TEST(expressions, test_prefix_op_and_points) {
 	ASSERT_STREQ(expression_format(&expr), "(- (- (. f g)))");
 }
 
-TEST(expressions, test_prefix_and_postfix_ops) {
-	struct expression expr = expression_new("-9!");
-	ASSERT_STREQ(expression_format(&expr), "(- (! 9))");
-}
-
-TEST(expressions, test_postfix_and_dot_ops) {
-	struct expression expr = expression_new("f . g !");
-	ASSERT_STREQ(expression_format(&expr), "(! (. f g))");
-}
-
 TEST(expressions, test_parens) {
 	struct expression expr = expression_new("(((0)))");
 	ASSERT_STREQ(expression_format(&expr), "0");

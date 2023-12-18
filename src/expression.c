@@ -272,6 +272,7 @@ static struct expression expression_binding_power(
 
 static struct binding_power prefix_binding_power(enum token_type op) {
 	switch (op) {
+		case TOKEN_BANG:
 		case TOKEN_PLUS:
 		case TOKEN_DASH:
 			return (struct binding_power){0, 5, true};
@@ -302,7 +303,6 @@ static struct binding_power infix_binding_power(enum token_type op) {
 
 static struct binding_power postfix_binding_power(enum token_type op) {
 	switch (op) {
-		case TOKEN_BANG:
 		case TOKEN_LEFT_PAREN:
 		case TOKEN_LEFT_BRACKET:
 			return (struct binding_power){7, 0, true};
