@@ -148,6 +148,9 @@ static void lexer_lex(struct lexer *l) {
 				case '.':
 					lexer_add_single_character_token(l, TOKEN_DOT);
 					break;
+				case ',':
+					lexer_add_single_character_token(l, TOKEN_COMMA);
+					break;
 			}
 		}
 	}

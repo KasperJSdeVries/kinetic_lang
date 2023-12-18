@@ -183,7 +183,34 @@ static struct expression expression_binding_power(
 				expr.cons.subexprs = calloc(2, sizeof(struct expression));
 				expr.cons.subexprs[0] = lhs;
 				expr.cons.subexprs[1] = rhs;
+			} else if (op == TOKEN_LEFT_PAREN) {
+				struct expression *parameters =
+				    calloc(1, sizeof(struct expression));
+				parameters[0] = lhs;
 
+				size_t parameter_count = 0;
+
+				while ((token = lexer_peek(lexer)).type != TOKEN_RIGHT_PAREN) {
+					if (parameter_count != 0) {
+						if (token.type != TOKEN_COMMA) {
+							fprintf(stderr, "expected comma\n");
+							exit(1);
+						}
+						lexer_next(lexer);
+					}
+					parameter_count++;
+					parameters = reallocarray(
+					    parameters, parameter_count + 1,
+					    sizeof(struct expression)
+					);
+					parameters[parameter_count] =
+					    expression_binding_power(lexer, 0);
+				}
+
+				lexer_next(lexer);
+
+				expr.cons.subexpr_count = parameter_count + 1;
+				expr.cons.subexprs = parameters;
 			} else {
 				expr.cons.subexpr_count = 1;
 				expr.cons.subexprs = calloc(1, sizeof(struct expression));
@@ -276,6 +303,7 @@ static struct binding_power infix_binding_power(enum token_type op) {
 static struct binding_power postfix_binding_power(enum token_type op) {
 	switch (op) {
 		case TOKEN_BANG:
+		case TOKEN_LEFT_PAREN:
 		case TOKEN_LEFT_BRACKET:
 			return (struct binding_power){7, 0, true};
 		default:

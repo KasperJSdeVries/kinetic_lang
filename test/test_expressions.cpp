@@ -72,3 +72,13 @@ TEST(expressions, test_ternaries_and_equals) {
 	struct expression expr = expression_new("a = 0 ? b : c = d");
 	ASSERT_STREQ(expression_format(&expr), "(= a (= (? 0 b c) d))");
 }
+
+TEST(expressions, test_function_calls) {
+	struct expression expr = expression_new("bruh(a, b, c)");
+	ASSERT_STREQ(expression_format(&expr), "(( bruh a b c)");
+}
+
+TEST(expressions, test_nested_function_calls) {
+	struct expression expr = expression_new("bruh(a, b(d, e(f)), c)");
+	ASSERT_STREQ(expression_format(&expr), "(( bruh a (( b d (( e f)) c)");
+}
