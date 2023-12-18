@@ -18,9 +18,9 @@ static struct expression expression_binding_power(
     struct lexer *lexer,
     uint8_t min_bp
 );
-static struct binding_power prefix_binding_power(char op);
-static struct binding_power infix_binding_power(char op);
-static struct binding_power postfix_binding_power(char op);
+static struct binding_power prefix_binding_power(enum token_type op);
+static struct binding_power infix_binding_power(enum token_type op);
+static struct binding_power postfix_binding_power(enum token_type op);
 
 struct expression expression_new(const char *input) {
 	struct lexer lexer = lexer_new(input);
@@ -41,10 +41,58 @@ char *expression_format(const struct expression *expr) {
 	size_t offset = 0;
 	switch (expr->type) {
 		case E_ATOM:
-			sprintf(s + offset, "%c", expr->atom.id);
+			sprintf(s + offset, "%s", expr->atom.value);
 			break;
-		case E_CONS:
-			sprintf(s + offset, "(%c", expr->cons.op);
+		case E_CONS: {
+			char *op;
+			switch (expr->cons.op) {
+				case TOKEN_PLUS:
+					op = "+";
+					break;
+				case TOKEN_DASH:
+					op = "-";
+					break;
+				case TOKEN_STAR:
+					op = "*";
+					break;
+				case TOKEN_SLASH:
+					op = "/";
+					break;
+				case TOKEN_EQUALS:
+					op = "=";
+					break;
+				case TOKEN_LEFT_PAREN:
+					op = "(";
+					break;
+				case TOKEN_RIGHT_PAREN:
+					op = ")";
+					break;
+				case TOKEN_LEFT_BRACKET:
+					op = "[";
+					break;
+				case TOKEN_RIGHT_BRACKET:
+					op = "]";
+					break;
+				case TOKEN_DOT:
+					op = ".";
+					break;
+				case TOKEN_BANG:
+					op = "!";
+					break;
+				case TOKEN_QUESTION:
+					op = "?";
+					break;
+				case TOKEN_COLON:
+					op = ":";
+					break;
+				case TOKEN_SEMICOLON:
+					op = ";";
+					break;
+				default:
+					fprintf(stderr, "bad op %d\n", expr->cons.op);
+					exit(1);
+			}
+			sprintf(s + offset, "(%s", op);
 			offset = strlen(s);
 			for (size_t i = 0; i < expr->cons.subexpr_count; i++) {
 				sprintf(
@@ -55,6 +103,7 @@ char *expression_format(const struct expression *expr) {
 			}
 			sprintf(s + offset, ")");
 			break;
+		}
 	}
 	return s;
 }
@@ -65,42 +114,33 @@ static struct expression expression_binding_power(
 ) {
 	struct token token;
 
+	struct binding_power bp;
 	struct expression lhs;
 	token = lexer_next(lexer);
-	switch (token.type) {
-		case TOKEN_ATOM:
-			lhs.type = E_ATOM;
-			lhs.atom.id = token.lexeme;
-			break;
-
-		case TOKEN_OP: {
-			if (token.lexeme == '(') {
-				lhs = expression_binding_power(lexer, 0);
-				token = lexer_next(lexer);
-				if (token.type != TOKEN_OP || token.lexeme != ')') {
-					fprintf(stderr, "expected closing parenthesis\n");
-					exit(1);
-				}
-			} else {
-				struct binding_power bp = prefix_binding_power(token.lexeme);
-				struct expression rhs =
-				    expression_binding_power(lexer, bp.right);
-
-				lhs.type = E_CONS;
-				lhs.cons.op = token.lexeme;
-				lhs.cons.subexpr_count = 1;
-				lhs.cons.subexprs = calloc(1, sizeof(struct expression));
-				lhs.cons.subexprs[0] = rhs;
-			}
-
-			break;
-		}
-		default:
-			fprintf(
-			    stderr, "bad token %d: '%c', expected atom\n", token.type,
-			    token.lexeme
-			);
+	if (token.type == TOKEN_NUMBER || token.type == TOKEN_IDENTIFIER) {
+		lhs.type = E_ATOM;
+		lhs.atom.value = lexeme_to_string(token.lexeme);
+	} else if (token.type == TOKEN_LEFT_PAREN) {
+		lhs = expression_binding_power(lexer, 0);
+		token = lexer_next(lexer);
+		if (token.type != TOKEN_RIGHT_PAREN) {
+			fprintf(stderr, "expected closing parenthesis\n");
 			exit(1);
+		}
+	} else if ((bp = prefix_binding_power(token.type)).some) {
+		struct expression rhs = expression_binding_power(lexer, bp.right);
+
+		lhs.type = E_CONS;
+		lhs.cons.op = token.type;
+		lhs.cons.subexpr_count = 1;
+		lhs.cons.subexprs = calloc(1, sizeof(struct expression));
+		lhs.cons.subexprs[0] = rhs;
+	} else {
+		fprintf(
+		    stderr, "bad token %d: '%s', expected atom\n", token.type,
+		    lexeme_to_string(token.lexeme)
+		);
+		exit(1);
 	}
 
 	for (;;) {
@@ -108,17 +148,18 @@ static struct expression expression_binding_power(
 		if (token.type == TOKEN_EOF) {
 			break;
 		}
-		char op;
+		enum token_type op;
 		switch (token.type) {
-			case TOKEN_OP:
-				op = token.lexeme;
-				break;
-			default:
+			case TOKEN_NUMBER:
+			case TOKEN_IDENTIFIER:
 				fprintf(
-				    stderr, "bad token %d: '%c', expected operator\n",
-				    token.type, token.lexeme
+				    stderr, "bad token %d: '%s', expected operator\n",
+				    token.type, lexeme_to_string(token.lexeme)
 				);
 				exit(1);
+			default:
+				op = token.type;
+				break;
 		}
 
 		struct binding_power bp;
@@ -132,10 +173,10 @@ static struct expression expression_binding_power(
 			struct expression expr;
 			expr.type = E_CONS;
 			expr.cons.op = op;
-			if (op == '[') {
+			if (op == TOKEN_LEFT_BRACKET) {
 				struct expression rhs = expression_binding_power(lexer, 0);
 				token = lexer_next(lexer);
-				if (token.type != TOKEN_OP || token.lexeme != ']') {
+				if (token.type != TOKEN_RIGHT_BRACKET) {
 					fprintf(stderr, "expected closing bracket\n");
 					exit(1);
 				}
@@ -166,11 +207,11 @@ static struct expression expression_binding_power(
 			expr.type = E_CONS;
 			expr.cons.op = op;
 
-			if (op == '?') {
+			if (op == TOKEN_QUESTION) {
 				struct expression mhs = expression_binding_power(lexer, 0);
 
 				token = lexer_next(lexer);
-				if (token.type != TOKEN_OP || token.lexeme != ':') {
+				if (token.type != TOKEN_COLON) {
 					fprintf(stderr, "expected colon\n");
 					exit(1);
 				}
@@ -204,10 +245,10 @@ static struct expression expression_binding_power(
 	return lhs;
 }
 
-static struct binding_power prefix_binding_power(char op) {
+static struct binding_power prefix_binding_power(enum token_type op) {
 	switch (op) {
-		case '+':
-		case '-':
+		case TOKEN_PLUS:
+		case TOKEN_DASH:
 			return (struct binding_power){0, 5, true};
 		default:
 			fprintf(stderr, "bad op %c\n", op);
@@ -215,29 +256,29 @@ static struct binding_power prefix_binding_power(char op) {
 	}
 }
 
-static struct binding_power infix_binding_power(char op) {
+static struct binding_power infix_binding_power(enum token_type op) {
 	switch (op) {
-		case '=':
+		case TOKEN_EQUALS:
 			return (struct binding_power){2, 1, true};
-		case '?':
+		case TOKEN_QUESTION:
 			return (struct binding_power){4, 3, true};
-		case '+':
-		case '-':
+		case TOKEN_PLUS:
+		case TOKEN_DASH:
 			return (struct binding_power){1, 2, true};
-		case '*':
-		case '/':
+		case TOKEN_STAR:
+		case TOKEN_SLASH:
 			return (struct binding_power){3, 4, true};
-		case '.':
+		case TOKEN_DOT:
 			return (struct binding_power){10, 9, true};
 		default:
 			return (struct binding_power){.some = false};
 	}
 }
 
-static struct binding_power postfix_binding_power(char op) {
+static struct binding_power postfix_binding_power(enum token_type op) {
 	switch (op) {
-		case '!':
-		case '[':
+		case TOKEN_BANG:
+		case TOKEN_LEFT_BRACKET:
 			return (struct binding_power){7, 0, true};
 		default:
 			return (struct binding_power){.some = false};

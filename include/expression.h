@@ -1,6 +1,7 @@
 #ifndef _EXPRESSION_H
 #define _EXPRESSION_H
 
+#include "token.h"
 #include <stddef.h>
 
 enum expression_type {
@@ -9,11 +10,11 @@ enum expression_type {
 };
 
 struct e_atom {
-	char id;
+	char *value;
 };
 
 struct e_cons {
-	char op;
+	enum token_type op;
 	struct expression *subexprs;
 	size_t subexpr_count;
 };

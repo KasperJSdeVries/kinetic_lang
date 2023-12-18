@@ -6,6 +6,8 @@
 #include <stddef.h>
 
 struct lexer {
+	const char *input;
+	size_t current_index;
 	struct token *tokens;
 	size_t token_count;
 	size_t token_capacity;
