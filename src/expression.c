@@ -117,7 +117,7 @@ static struct expression expression_binding_power(
 	struct binding_power bp;
 	struct expression lhs;
 	token = lexer_next(lexer);
-	if (token.type == TOKEN_NUMBER || token.type == TOKEN_IDENTIFIER) {
+	if (token.category == TOKEN_CATEGORY_LITERAL) {
 		lhs.type = E_ATOM;
 		lhs.atom.value = lexeme_to_string(token.lexeme);
 	} else if (token.type == TOKEN_LEFT_PAREN) {
@@ -149,17 +149,16 @@ static struct expression expression_binding_power(
 			break;
 		}
 		enum token_type op;
-		switch (token.type) {
-			case TOKEN_NUMBER:
-			case TOKEN_IDENTIFIER:
+		switch (token.category) {
+			case TOKEN_CATEGORY_OPERATOR:
+				op = token.type;
+				break;
+			default:
 				fprintf(
 				    stderr, "bad token %d: '%s', expected operator\n",
 				    token.type, lexeme_to_string(token.lexeme)
 				);
 				exit(1);
-			default:
-				op = token.type;
-				break;
 		}
 
 		struct binding_power bp;

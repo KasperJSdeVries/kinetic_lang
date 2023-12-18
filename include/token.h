@@ -30,8 +30,15 @@ struct lexeme {
 	size_t length;
 };
 
+enum token_category {
+	TOKEN_CATEGORY_UNKNOWN,
+	TOKEN_CATEGORY_OPERATOR,
+	TOKEN_CATEGORY_LITERAL,
+};
+
 struct token {
 	enum token_type type;
+	enum token_category category;
 	struct lexeme lexeme;
 };
 

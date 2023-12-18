@@ -78,6 +78,7 @@ static void lexer_lex(struct lexer *l) {
 			    l,
 			    (struct token){
 			        .type = TOKEN_IDENTIFIER,
+			        .category = TOKEN_CATEGORY_LITERAL,
 			        .lexeme =
 			            (struct lexeme){
 			                lexeme_start,
@@ -98,6 +99,7 @@ static void lexer_lex(struct lexer *l) {
 			    l,
 			    (struct token){
 			        .type = TOKEN_NUMBER,
+			        .category = TOKEN_CATEGORY_LITERAL,
 			        .lexeme =
 			            (struct lexeme){
 			                lexeme_start,
@@ -159,6 +161,7 @@ static void lexer_add_single_character_token(
 	    l,
 	    (struct token){
 	        .type = t,
+	        .category = TOKEN_CATEGORY_OPERATOR,
 	        .lexeme =
 	            (struct lexeme){
 	                &l->input[l->current_index],
