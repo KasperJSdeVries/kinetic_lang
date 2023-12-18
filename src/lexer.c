@@ -2,7 +2,6 @@
 #include "token.h"
 
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -57,49 +56,6 @@ struct token lexer_peek(struct lexer *l) {
 		return (struct token){.type = TOKEN_EOF};
 	}
 	return l->tokens[l->token_count - 1];
-}
-
-static void lexer_add_single_character_token(
-    struct lexer *l,
-    enum token_type t
-) {
-	lexer_add_token(
-	    l,
-	    (struct token){
-	        .type = t,
-	        .lexeme =
-	            (struct lexeme){
-	                &l->input[l->current_index],
-	                1,
-	            },
-	    }
-	);
-}
-
-static void lexer_add_token(struct lexer *l, struct token t) {
-	if (l->token_count + 1 > l->token_capacity) {
-		l->token_capacity *= 2;
-		l->tokens =
-		    realloc(l->tokens, sizeof(struct token) * l->token_capacity);
-	}
-	l->tokens[l->token_count++] = t;
-	lexer_next_char(l);
-}
-
-static char lexer_get_current_char(const struct lexer *l) {
-	return l->input[l->current_index];
-}
-
-static void lexer_next_char(struct lexer *l) {
-	l->current_index++;
-}
-
-static char lexer_peek_char(const struct lexer *l) {
-	return l->input[l->current_index + 1];
-}
-
-static const char *lexer_get_current_lexeme(const struct lexer *l) {
-	return &l->input[l->current_index];
 }
 
 static void lexer_lex(struct lexer *l) {
@@ -193,4 +149,50 @@ static void lexer_lex(struct lexer *l) {
 			}
 		}
 	}
+}
+
+static void lexer_add_single_character_token(
+    struct lexer *l,
+    enum token_type t
+) {
+	lexer_add_token(
+	    l,
+	    (struct token){
+	        .type = t,
+	        .lexeme =
+	            (struct lexeme){
+	                &l->input[l->current_index],
+	                1,
+	            },
+	    }
+	);
+}
+
+static void lexer_add_token(struct lexer *l, struct token t) {
+	if (l->token_count + 1 > l->token_capacity) {
+		l->token_capacity *= 2;
+		l->tokens =
+		    realloc(l->tokens, sizeof(struct token) * l->token_capacity);
+	}
+	l->tokens[l->token_count++] = t;
+	lexer_next_char(l);
+}
+
+static char lexer_get_current_char(const struct lexer *l) {
+	if (l->current_index > strlen(l->input)) {
+		return '\0';
+	}
+	return l->input[l->current_index];
+}
+
+static void lexer_next_char(struct lexer *l) {
+	l->current_index++;
+}
+
+static char lexer_peek_char(const struct lexer *l) {
+	return l->input[l->current_index + 1];
+}
+
+static const char *lexer_get_current_lexeme(const struct lexer *l) {
+	return &l->input[l->current_index];
 }

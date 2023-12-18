@@ -224,7 +224,6 @@ static struct expression expression_binding_power(
 				expr.cons.subexprs[0] = lhs;
 				expr.cons.subexprs[1] = mhs;
 				expr.cons.subexprs[2] = rhs;
-
 			} else {
 				struct expression rhs =
 				    expression_binding_power(lexer, bp.right);

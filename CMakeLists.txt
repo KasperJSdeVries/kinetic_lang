@@ -28,6 +28,10 @@ file(GLOB_RECURSE SOURCES src/*.c src/*.h)
 add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+file(GLOB_RECURSE EXAMPLE_SOURCES example/*.c)
+add_executable(${PROJECT_NAME}_example ${EXAMPLE_SOURCES})
+target_link_libraries(${PROJECT_NAME}_example ${PROJECT_NAME})
+
 ## Testing
 enable_testing()
 
