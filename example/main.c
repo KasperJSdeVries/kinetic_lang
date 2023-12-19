@@ -1,3 +1,4 @@
+#include "ast.h"
 #include "expression.h"
 #include "gen.h"
 
@@ -35,8 +36,10 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	struct expression expression = expression_new(buffer);
+	struct ast_node expression = expression_parse(buffer);
 	generatecode(expression, out_file);
+
+	ast_node_free(expression);
 
 	fclose(out_file);
 

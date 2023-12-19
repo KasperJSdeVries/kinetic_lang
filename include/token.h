@@ -43,6 +43,7 @@ struct token {
 	struct lexeme lexeme;
 };
 
+char *token_type_to_string(enum token_type type);
 char *lexeme_to_string(struct lexeme lexeme);
 
 #endif // _TOKEN_H

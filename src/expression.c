@@ -1,4 +1,5 @@
 #include "expression.h"
+#include "ast.h"
 #include "lexer.h"
 #include "token.h"
 
@@ -14,7 +15,7 @@ struct binding_power {
 	bool some;
 };
 
-static struct expression expression_binding_power(
+static struct ast_node expression_binding_power(
     struct lexer *lexer,
     uint8_t min_bp
 );
@@ -22,104 +23,118 @@ static struct binding_power prefix_binding_power(enum token_type op);
 static struct binding_power infix_binding_power(enum token_type op);
 static struct binding_power postfix_binding_power(enum token_type op);
 
-struct expression expression_new(const char *input) {
+static enum ast_node_type get_ast_node_type(enum token_type op);
+
+struct ast_node expression_parse(const char *input) {
 	struct lexer lexer = lexer_new(input);
-	return expression_binding_power(&lexer, 0);
+	struct ast_node expr = expression_binding_power(&lexer, 0);
+	lexer_free(&lexer);
+	return expr;
 }
 
-void expression_free(struct expression *expr) {
-	if (expr->type == E_CONS) {
-		for (size_t i = 0; i < expr->cons.subexpr_count; i++) {
-			expression_free(&expr->cons.subexprs[i]);
-		}
-		free(expr->cons.subexprs);
-	}
-}
-
-char *expression_format(const struct expression *expr) {
+char *expression_format(const struct ast_node *expr) {
 	char *s = calloc(1024, 1);
 	size_t offset = 0;
-	switch (expr->type) {
-		case E_ATOM:
-			sprintf(s + offset, "%s", expr->atom.value);
-			break;
-		case E_CONS: {
-			char *op;
-			switch (expr->cons.op) {
-				case TOKEN_PLUS:
-					op = "+";
+	switch (expr->category) {
+		case AST_CATEGORY_LITERAL:
+			switch (expr->type) {
+				case AST_TYPE_INTEGER_LITERAL:
+					sprintf(s + offset, "%d", expr->literal.integer);
 					break;
-				case TOKEN_DASH:
-					op = "-";
-					break;
-				case TOKEN_STAR:
-					op = "*";
-					break;
-				case TOKEN_SLASH:
-					op = "/";
-					break;
-				case TOKEN_EQUALS:
-					op = "=";
-					break;
-				case TOKEN_LEFT_PAREN:
-					op = "(";
-					break;
-				case TOKEN_RIGHT_PAREN:
-					op = ")";
-					break;
-				case TOKEN_LEFT_BRACKET:
-					op = "[";
-					break;
-				case TOKEN_RIGHT_BRACKET:
-					op = "]";
-					break;
-				case TOKEN_DOT:
-					op = ".";
-					break;
-				case TOKEN_BANG:
-					op = "!";
-					break;
-				case TOKEN_QUESTION:
-					op = "?";
-					break;
-				case TOKEN_COLON:
-					op = ":";
-					break;
-				case TOKEN_SEMICOLON:
-					op = ";";
+				case AST_TYPE_IDENTIFIER:
+					sprintf(s + offset, "%s", expr->literal.identifier);
 					break;
 				default:
-					fprintf(stderr, "bad op %d\n", expr->cons.op);
+					fprintf(stderr, "bad literal %d\n", expr->type);
+					exit(1);
+			}
+			break;
+		case AST_CATEGORY_OPERAND: {
+			char *op;
+			switch (expr->type) {
+				case AST_TYPE_ADD:
+					op = "+";
+					break;
+				case AST_TYPE_SUBTRACT:
+					op = "-";
+					break;
+				case AST_TYPE_MULTIPLY:
+					op = "*";
+					break;
+				case AST_TYPE_DIVIDE:
+					op = "/";
+					break;
+				case AST_TYPE_ASSIGN:
+					op = "=";
+					break;
+				case AST_TYPE_FUNCTION_CALL:
+					op = "()";
+					break;
+				case AST_TYPE_INDEX:
+					op = "[]";
+					break;
+				case AST_TYPE_MEMBER:
+					op = ".";
+					break;
+				case AST_TYPE_PROMOTE:
+					op = "+";
+					break;
+				case AST_TYPE_TERNARY:
+					op = "?:";
+					break;
+				default:
+					fprintf(
+					    stderr, "bad op %s\n", node_type_to_string(expr->type)
+					);
 					exit(1);
 			}
 			sprintf(s + offset, "(%s", op);
 			offset = strlen(s);
-			for (size_t i = 0; i < expr->cons.subexpr_count; i++) {
-				sprintf(
-				    s + offset, " %s",
-				    expression_format(&expr->cons.subexprs[i])
-				);
+			for (size_t i = 0; i < expr->operand.child_count; i++) {
+
+				char *child_str = expression_format(&expr->operand.children[i]);
+				sprintf(s + offset, " %s", child_str);
+				free(child_str);
 				offset = strlen(s);
 			}
 			sprintf(s + offset, ")");
 			break;
 		}
+		default:
+			break;
 	}
 	return s;
 }
 
-static struct expression expression_binding_power(
+static struct ast_node expression_binding_power(
     struct lexer *lexer,
     uint8_t min_bp
 ) {
 	struct token token;
 
 	struct binding_power bp;
-	struct expression lhs;
+	struct ast_node lhs = {};
 	token = lexer_next(lexer);
 	if (token.category == TOKEN_CATEGORY_LITERAL) {
-		lhs.type = E_ATOM;
-		lhs.atom.value = lexeme_to_string(token.lexeme);
+		lhs.category = AST_CATEGORY_LITERAL;
+		switch (token.type) {
+			case TOKEN_NUMBER:
+				lhs.type = AST_TYPE_INTEGER_LITERAL;
+				char *s = lexeme_to_string(token.lexeme);
+				lhs.literal.integer = atoi(s);
+				free(s);
+				break;
+			case TOKEN_IDENTIFIER:
+				lhs.type = AST_TYPE_IDENTIFIER;
+				lhs.literal.identifier = lexeme_to_string(token.lexeme);
+				break;
+			default:
+				fprintf(
+				    stderr, "bad literal type %s\n",
+				    token_type_to_string(token.type)
+				);
+				exit(1);
+		}
 	} else if (token.type == TOKEN_LEFT_PAREN) {
 		lhs = expression_binding_power(lexer, 0);
 		token = lexer_next(lexer);
@@ -128,13 +143,11 @@ static struct expression expression_binding_power(
 			exit(1);
 		}
 	} else if ((bp = prefix_binding_power(token.type)).some) {
-		struct expression rhs = expression_binding_power(lexer, bp.right);
+		struct ast_node rhs = expression_binding_power(lexer, bp.right);
 
-		lhs.type = E_CONS;
-		lhs.cons.op = token.type;
-		lhs.cons.subexpr_count = 1;
-		lhs.cons.subexprs = calloc(1, sizeof(struct expression));
-		lhs.cons.subexprs[0] = rhs;
+		lhs.type = get_ast_node_type(token.type);
+		lhs.category = AST_CATEGORY_OPERAND;
+		operand_add_child(&lhs.operand, rhs);
 	} else {
 		fprintf(
 		    stderr, "bad token %d: '%s', expected atom\n", token.type,
@@ -169,25 +182,20 @@ static struct expression expression_binding_power(
 			}
 			lexer_next(lexer);
 
-			struct expression expr;
-			expr.type = E_CONS;
-			expr.cons.op = op;
+			struct ast_node expr = {};
+			expr.type = get_ast_node_type(op);
+			expr.category = AST_CATEGORY_OPERAND;
+			operand_add_child(&expr.operand, lhs);
+
 			if (op == TOKEN_LEFT_BRACKET) {
-				struct expression rhs = expression_binding_power(lexer, 0);
+				struct ast_node rhs = expression_binding_power(lexer, 0);
 				token = lexer_next(lexer);
 				if (token.type != TOKEN_RIGHT_BRACKET) {
 					fprintf(stderr, "expected closing bracket\n");
 					exit(1);
 				}
-				expr.cons.subexpr_count = 2;
-				expr.cons.subexprs = calloc(2, sizeof(struct expression));
-				expr.cons.subexprs[0] = lhs;
-				expr.cons.subexprs[1] = rhs;
+				operand_add_child(&expr.operand, rhs);
 			} else if (op == TOKEN_LEFT_PAREN) {
-				struct expression *parameters =
-				    calloc(1, sizeof(struct expression));
-				parameters[0] = lhs;
-
 				size_t parameter_count = 0;
 
 				while ((token = lexer_peek(lexer)).type != TOKEN_RIGHT_PAREN) {
@@ -198,23 +206,13 @@ static struct expression expression_binding_power(
 						}
 						lexer_next(lexer);
 					}
-					parameter_count++;
-					parameters = reallocarray(
-					    parameters, parameter_count + 1,
-					    sizeof(struct expression)
+					operand_add_child(
+					    &expr.operand, expression_binding_power(lexer, 0)
 					);
-					parameters[parameter_count] =
-					    expression_binding_power(lexer, 0);
+					parameter_count++;
 				}
 
 				lexer_next(lexer);
-
-				expr.cons.subexpr_count = parameter_count + 1;
-				expr.cons.subexprs = parameters;
-			} else {
-				expr.cons.subexpr_count = 1;
-				expr.cons.subexprs = calloc(1, sizeof(struct expression));
-				expr.cons.subexprs[0] = lhs;
 			}
 
 			lhs = expr;
@@ -229,12 +227,12 @@ static struct expression expression_binding_power(
 
 			lexer_next(lexer);
 
-			struct expression expr;
-			expr.type = E_CONS;
-			expr.cons.op = op;
+			struct ast_node expr = {};
+			expr.type = get_ast_node_type(op);
+			expr.category = AST_CATEGORY_OPERAND;
 
 			if (op == TOKEN_QUESTION) {
-				struct expression mhs = expression_binding_power(lexer, 0);
+				struct ast_node mhs = expression_binding_power(lexer, 0);
 
 				token = lexer_next(lexer);
 				if (token.type != TOKEN_COLON) {
@@ -242,22 +240,16 @@ static struct expression expression_binding_power(
 					exit(1);
 				}
 
-				struct expression rhs =
-				    expression_binding_power(lexer, bp.right);
+				struct ast_node rhs = expression_binding_power(lexer, bp.right);
 
-				expr.cons.subexpr_count = 3;
-				expr.cons.subexprs = calloc(3, sizeof(struct expression));
-				expr.cons.subexprs[0] = lhs;
-				expr.cons.subexprs[1] = mhs;
-				expr.cons.subexprs[2] = rhs;
+				operand_add_child(&expr.operand, lhs);
+				operand_add_child(&expr.operand, mhs);
+				operand_add_child(&expr.operand, rhs);
 			} else {
-				struct expression rhs =
-				    expression_binding_power(lexer, bp.right);
+				struct ast_node rhs = expression_binding_power(lexer, bp.right);
 
-				expr.cons.subexpr_count = 2;
-				expr.cons.subexprs = calloc(2, sizeof(struct expression));
-				expr.cons.subexprs[0] = lhs;
-				expr.cons.subexprs[1] = rhs;
+				operand_add_child(&expr.operand, lhs);
+				operand_add_child(&expr.operand, rhs);
 			}
 
 			lhs = expr;
@@ -277,7 +269,7 @@ static struct binding_power prefix_binding_power(enum token_type op) {
 		case TOKEN_DASH:
 			return (struct binding_power){0, 5, true};
 		default:
-			fprintf(stderr, "bad op %c\n", op);
+			fprintf(stderr, "bad op %s\n", token_type_to_string(op));
 			exit(1);
 	}
 }
@@ -308,5 +300,31 @@ static struct binding_power postfix_binding_power(enum token_type op) {
 			return (struct binding_power){7, 0, true};
 		default:
 			return (struct binding_power){.some = false};
+	}
+}
+
+static enum ast_node_type get_ast_node_type(enum token_type op) {
+	switch (op) {
+		case TOKEN_PLUS:
+			return AST_TYPE_ADD;
+		case TOKEN_DASH:
+			return AST_TYPE_SUBTRACT;
+		case TOKEN_STAR:
+			return AST_TYPE_MULTIPLY;
+		case TOKEN_SLASH:
+			return AST_TYPE_DIVIDE;
+		case TOKEN_LEFT_PAREN:
+			return AST_TYPE_FUNCTION_CALL;
+		case TOKEN_LEFT_BRACKET:
+			return AST_TYPE_INDEX;
+		case TOKEN_DOT:
+			return AST_TYPE_MEMBER;
+		case TOKEN_QUESTION:
+			return AST_TYPE_TERNARY;
+		case TOKEN_EQUALS:
+			return AST_TYPE_ASSIGN;
+		default:
+			fprintf(stderr, "bad op %s\n", token_type_to_string(op));
+			exit(1);
 	}
 }

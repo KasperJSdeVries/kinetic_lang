@@ -1,14 +1,13 @@
 #include "gen.h"
 
+#include "ast.h"
 #include "codegen.h"
-#include "expression.h"
-#include "token.h"
 
 #include <stdlib.h>
 
-static int genAST(struct expression n, FILE *out_file);
+static int genAST(struct ast_node n, FILE *out_file);
 
-void generatecode(struct expression n, FILE *out_file) {
+void generatecode(struct ast_node n, FILE *out_file) {
 	int reg;
 
 	cgpreamble(out_file);
@@ -17,27 +16,27 @@ void generatecode(struct expression n, FILE *out_file) {
 	cgpostamble(out_file);
 }
 
-static int genAST(struct expression n, FILE *out_file) {
-	switch (n.type) {
-		case E_ATOM:
-			return cgload(atoi(n.atom.value), out_file);
-		case E_CONS: {
-			int subregisters[n.cons.subexpr_count];
-			for (size_t i = 0; i < n.cons.subexpr_count; i++) {
-				subregisters[i] = genAST(n.cons.subexprs[i], out_file);
+static int genAST(struct ast_node n, FILE *out_file) {
+	switch (n.category) {
+		case AST_CATEGORY_LITERAL:
+			return cgload(n.literal.integer, out_file);
+		case AST_CATEGORY_OPERAND: {
+			int subregisters[n.operand.child_count];
+			for (size_t i = 0; i < n.operand.child_count; i++) {
+				subregisters[i] = genAST(n.operand.children[i], out_file);
 			}
 
-			switch (n.cons.op) {
-				case TOKEN_PLUS:
+			switch (n.type) {
+				case AST_TYPE_ADD:
 					return cgadd(subregisters[0], subregisters[1], out_file);
-				case TOKEN_DASH:
+				case AST_TYPE_SUBTRACT:
 					return cgsub(subregisters[0], subregisters[1], out_file);
-				case TOKEN_STAR:
+				case AST_TYPE_MULTIPLY:
 					return cgmul(subregisters[0], subregisters[1], out_file);
-				case TOKEN_SLASH:
+				case AST_TYPE_DIVIDE:
 					return cgdiv(subregisters[0], subregisters[1], out_file);
 				default:
-					fprintf(stderr, "Unsupported operator: %d\n", n.cons.op);
+					fprintf(stderr, "Unsupported operator: %d\n", n.type);
 					exit(1);
 			}
 		}

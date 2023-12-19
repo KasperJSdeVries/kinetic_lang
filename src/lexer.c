@@ -178,7 +178,7 @@ static void lexer_add_token(struct lexer *l, struct token t) {
 	if (l->token_count + 1 > l->token_capacity) {
 		l->token_capacity *= 2;
 		l->tokens =
-		    realloc(l->tokens, sizeof(struct token) * l->token_capacity);
+		    reallocarray(l->tokens, l->token_capacity, sizeof(struct token));
 	}
 	l->tokens[l->token_count++] = t;
 	lexer_next_char(l);
