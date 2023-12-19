@@ -126,3 +126,56 @@ TEST(lexer, test_token_categories) {
 
 	lexer_free(&lexer);
 }
+
+TEST(lexer, test_keywords) {
+	struct lexer lexer = lexer_new("const do else false for if in interface "
+	                               "mut return struct switch true while");
+	struct token token;
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_CONST);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_DO);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_ELSE);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_FALSE);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_FOR);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_IF);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_IN);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_INTERFACE);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_MUT);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_RETURN);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_STRUCT);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_SWITCH);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_TRUE);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_WHILE);
+
+	token = lexer_next(&lexer);
+	ASSERT_EQ(token.type, TOKEN_EOF);
+
+	lexer_free(&lexer);
+}

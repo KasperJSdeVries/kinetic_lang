@@ -7,6 +7,7 @@
 
 struct lexer {
 	const char *input;
+	size_t lexeme_start;
 	size_t current_index;
 	struct token *tokens;
 	size_t token_count;
