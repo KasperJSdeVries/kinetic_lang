@@ -25,11 +25,8 @@ static struct binding_power postfix_binding_power(enum token_type op);
 
 static enum ast_node_type get_ast_node_type(enum token_type op);
 
-struct ast_node expression_parse(const char *input) {
-	struct lexer lexer = lexer_new(input);
-	struct ast_node expr = expression_binding_power(&lexer, 0);
-	lexer_free(&lexer);
-	return expr;
+struct ast_node expression_parse(struct lexer *lexer) {
+	return expression_binding_power(lexer, 0);
 }
 
 char *expression_format(const struct ast_node *expr) {
@@ -158,7 +155,7 @@ static struct ast_node expression_binding_power(
 
 	for (;;) {
 		token = lexer_peek(lexer);
-		if (token.type == TOKEN_EOF) {
+		if (token.type == TOKEN_SEMICOLON) {
 			break;
 		}
 		enum token_type op;

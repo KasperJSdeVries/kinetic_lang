@@ -6,7 +6,7 @@ extern "C" {
 }
 
 TEST(expressions, test_single_char) {
-	struct ast_node expr = expression_parse("1");
+	struct ast_node expr = expression_parse("1;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "1");
 	free(s);
@@ -14,7 +14,7 @@ TEST(expressions, test_single_char) {
 }
 
 TEST(expressions, test_simple_expression) {
-	struct ast_node expr = expression_parse("1 + 2 * 3");
+	struct ast_node expr = expression_parse("1 + 2 * 3;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(+ 1 (* 2 3))");
 	free(s);
@@ -22,7 +22,7 @@ TEST(expressions, test_simple_expression) {
 }
 
 TEST(expressions, test_binding_power) {
-	struct ast_node expr = expression_parse("a + b * c * d + e");
+	struct ast_node expr = expression_parse("a + b * c * d + e;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(+ (+ a (* (* b c) d)) e)");
 	free(s);
@@ -30,7 +30,7 @@ TEST(expressions, test_binding_power) {
 }
 
 TEST(expressions, test_points) {
-	struct ast_node expr = expression_parse("f . g . h");
+	struct ast_node expr = expression_parse("f . g . h;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(. f (. g h))");
 	free(s);
@@ -38,7 +38,7 @@ TEST(expressions, test_points) {
 }
 
 TEST(expressions, test_points_and_bp) {
-	struct ast_node expr = expression_parse(" 1 + 2 + f . g . h * 3 * 4");
+	struct ast_node expr = expression_parse(" 1 + 2 + f . g . h * 3 * 4;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(+ (+ 1 2) (* (* (. f (. g h)) 3) 4))");
 	free(s);
@@ -46,7 +46,7 @@ TEST(expressions, test_points_and_bp) {
 }
 
 TEST(expressions, test_prefix_ops) {
-	struct ast_node expr = expression_parse("--1 * 2");
+	struct ast_node expr = expression_parse("--1 * 2;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(* (- (- 1)) 2)");
 	free(s);
@@ -54,7 +54,7 @@ TEST(expressions, test_prefix_ops) {
 }
 
 TEST(expressions, test_prefix_op_and_points) {
-	struct ast_node expr = expression_parse("--f . g");
+	struct ast_node expr = expression_parse("--f . g;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(- (- (. f g)))");
 	free(s);
@@ -62,7 +62,7 @@ TEST(expressions, test_prefix_op_and_points) {
 }
 
 TEST(expressions, test_parens) {
-	struct ast_node expr = expression_parse("(((0)))");
+	struct ast_node expr = expression_parse("(((0)));");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "0");
 	free(s);
@@ -70,7 +70,7 @@ TEST(expressions, test_parens) {
 }
 
 TEST(expressions, test_brackets) {
-	struct ast_node expr = expression_parse("x[0][1]");
+	struct ast_node expr = expression_parse("x[0][1];");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "([] ([] x 0) 1)");
 	free(s);
@@ -80,7 +80,7 @@ TEST(expressions, test_brackets) {
 TEST(expressions, test_ternaries) {
 	struct ast_node expr = expression_parse("a ? b :"
 	                                        "c ? d"
-	                                        ": e");
+	                                        ": e;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(?: a b (?: c d e))");
 	free(s);
@@ -88,7 +88,7 @@ TEST(expressions, test_ternaries) {
 }
 
 TEST(expressions, test_ternaries_and_equals) {
-	struct ast_node expr = expression_parse("a = 0 ? b : c = d");
+	struct ast_node expr = expression_parse("a = 0 ? b : c = d;");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(= a (= (?: 0 b c) d))");
 	free(s);
@@ -96,7 +96,7 @@ TEST(expressions, test_ternaries_and_equals) {
 }
 
 TEST(expressions, test_function_calls) {
-	struct ast_node expr = expression_parse("bruh(a, b, c)");
+	struct ast_node expr = expression_parse("bruh(a, b, c);");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(() bruh a b c)");
 	free(s);
@@ -104,7 +104,7 @@ TEST(expressions, test_function_calls) {
 }
 
 TEST(expressions, test_nested_function_calls) {
-	struct ast_node expr = expression_parse("bruh(a, b(d, e(f)), c)");
+	struct ast_node expr = expression_parse("bruh(a, b(d, e(f)), c);");
 	char *s = expression_format(&expr);
 	ASSERT_STREQ(s, "(() bruh a (() b d (() e f)) c)");
 	free(s);
