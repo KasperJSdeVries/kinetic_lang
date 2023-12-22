@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	fseek(in_file, 0, SEEK_SET);
 	char buffer[size + 1];
 	buffer[size] = '\0';
-	(void)fread(buffer, 1, size, in_file);
+	fread(buffer, 1, size, in_file);
 	fclose(in_file);
 
 	FILE *out_file = fopen("out.s", "w");
